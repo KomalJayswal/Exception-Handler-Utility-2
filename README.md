@@ -21,9 +21,22 @@ Header contains the HTTP Status : 400
     ]
 }
 ```
+### Requirement
+HTTP Status and Error message for each of the following Exceptions are pre-defined. Consumers/Users are only allowed to provide the error messages. Created individual handler for each of the following exceptions :
+* DataNotFoundException
+* UnAuthorizedException
+* AccessDeniedException
+* ServerException
+* NoHandlerFoundException
+* BindException
+* AccessDeniedException
+* MissingServletRequestParameterException, ConstraintViolationException, HttpMediaTypeException, MissingRequestHeaderException, HttpMessageNotReadableException
+* ResourceAccessException
+* Exception 
+* TimeoutException
+
 
 ## Getting Started With Solution
-
 
 1. Please install Java 11 and maven in your system.
 2. Create a springboot project using https://start.spring.io. <br>
