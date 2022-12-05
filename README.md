@@ -35,5 +35,7 @@ HTTP Status and Error message for each of the following Exceptions are pre-defin
 * Exception 
 * TimeoutException
 
+Use https://github.com/KomalJayswal/IntegrateExceptionHandler02 to test.
+
 
 
