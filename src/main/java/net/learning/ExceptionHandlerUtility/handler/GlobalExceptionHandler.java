@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
      * @return the constructed ErrorResponse
      */
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorResponse> handleOhmValidationException(ValidationException validationException,
+    public ResponseEntity<ErrorResponse> handleValidationException(ValidationException validationException,
                                                                          ServletWebRequest servletWebRequest) {
         return new ResponseEntity<>(
                 ErrorResponse.builder()
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
      * @return the constructed ErrorResponse
      */
     @ExceptionHandler(DataNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleOhmDataNotFoundException(DataNotFoundException dataNotFoundException,
+    public ResponseEntity<ErrorResponse> handleDataNotFoundException(DataNotFoundException dataNotFoundException,
                                                                            ServletWebRequest servletWebRequest) {
         return new ResponseEntity<>(
                 ErrorResponse.builder()
@@ -88,7 +88,7 @@ public class GlobalExceptionHandler {
      * @return the constructed ErrorResponse
      */
     @ExceptionHandler(UnAuthorizedException.class)
-    public ResponseEntity<ErrorResponse> handleOhmUnAuthorizedException(UnAuthorizedException unAuthorizedException,
+    public ResponseEntity<ErrorResponse> handleUnAuthorizedException(UnAuthorizedException unAuthorizedException,
                                                                            ServletWebRequest servletWebRequest) {
         return new ResponseEntity<>(
                 ErrorResponse.builder()
@@ -96,29 +96,8 @@ public class GlobalExceptionHandler {
                         .requestUri(servletWebRequest.getRequest().getRequestURI())
                         .statusCode(HttpStatus.UNAUTHORIZED.name())
                         .timestamp(ExceptionHandlerHelperUtil.currentTimeStamp())
-                        .errors(unAuthorizedException.getErrorMessage())
+                        .errors(List.of(Errors.builder().errorMessage(Constants.UNAUTHORIZED_ERROR_MESSAGE).build()))
                         .build(),HttpStatus.UNAUTHORIZED);
-    }
-
-    /**
-     * Handler Method to return Error Response Object for AccessDeniedException
-     *
-     * @param accessDeniedException
-     *            to take as input
-     *
-     * @return the constructed ErrorResponse
-     */
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleOhmAccessDeniedException(AccessDeniedException accessDeniedException,
-                                                                           ServletWebRequest servletWebRequest) {
-        return new ResponseEntity<>(
-                ErrorResponse.builder()
-                        .method(Objects.requireNonNull(servletWebRequest.getHttpMethod()))
-                        .requestUri(servletWebRequest.getRequest().getRequestURI())
-                        .statusCode(HttpStatus.FORBIDDEN.name())
-                        .timestamp(ExceptionHandlerHelperUtil.currentTimeStamp())
-                        .errors(accessDeniedException.getErrorMessage())
-                        .build(),HttpStatus.FORBIDDEN);
     }
 
     /**
@@ -130,7 +109,7 @@ public class GlobalExceptionHandler {
      * @return the constructed ErrorResponse
      */
     @ExceptionHandler(ServerException.class)
-    public ResponseEntity<ErrorResponse> handleOhmServerException(ServerException serverException,
+    public ResponseEntity<ErrorResponse> handleServerException(ServerException serverException,
                                                                      ServletWebRequest servletWebRequest) {
         return new ResponseEntity<>(
                 ErrorResponse.builder()
@@ -175,16 +154,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({ BindException.class, MethodArgumentNotValidException.class })
     public ResponseEntity<ErrorResponse> handleBindException(BindException bindException,
                                                                 ServletWebRequest servletWebRequest) {
-
-        List<Errors> errorMessage = ExceptionHandlerHelperUtil.createErrorListFromValidationErrors(bindException.getBindingResult().getAllErrors());
-
         return new ResponseEntity<>(
                 ErrorResponse.builder()
                         .method(Objects.requireNonNull(servletWebRequest.getHttpMethod()))
                         .requestUri(servletWebRequest.getRequest().getRequestURI())
                         .statusCode(HttpStatus.BAD_REQUEST.name())
                         .timestamp(ExceptionHandlerHelperUtil.currentTimeStamp())
-                        .errors(errorMessage)
+                        .errors(ExceptionHandlerHelperUtil.createErrorListFromValidationErrors(bindException.getBindingResult().getAllErrors()))
                         .build(),
                 HttpStatus.BAD_REQUEST);
     }
@@ -243,8 +219,8 @@ public class GlobalExceptionHandler {
                 .requestUri(ExceptionHandlerHelperUtil.validateServletWebRequestForUri(servletWebRequest))
                 .statusCode(HttpStatus.BAD_REQUEST.name())
                 .timestamp(ExceptionHandlerHelperUtil.currentTimeStamp())
-                .errors(List.of(Errors.builder().errorMessage(Constants.ACCESS_DENIED_ERROR_MESSAGE).build())).build(),
-                HttpStatus.BAD_REQUEST);
+                .errors(errorList)
+                .build(), HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -275,31 +251,31 @@ public class GlobalExceptionHandler {
      *
      * @return the constructed ErrorResponse
      */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception exception, ServletWebRequest servletWebRequest) {
-
-        return new ResponseEntity<>(
-                ErrorResponse.builder()
-                        .timestamp(ExceptionHandlerHelperUtil.currentTimeStamp())
-                        .method(HttpMethod.valueOf(ExceptionHandlerHelperUtil.validateServletWebRequestForHttpMethod(servletWebRequest)))
-                        .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.name())
-                        .requestUri(ExceptionHandlerHelperUtil.validateServletWebRequestForUri(servletWebRequest))
-                        .errors(List.of(Errors.builder().errorMessage("Unexpected error occurred").build()))
-                        .build(),
-                HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ErrorResponse> handleException(Exception exception, ServletWebRequest servletWebRequest) {
+//
+//        return new ResponseEntity<>(
+//                ErrorResponse.builder()
+//                        .timestamp(ExceptionHandlerHelperUtil.currentTimeStamp())
+//                        .method(HttpMethod.valueOf(ExceptionHandlerHelperUtil.validateServletWebRequestForHttpMethod(servletWebRequest)))
+//                        .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.name())
+//                        .requestUri(ExceptionHandlerHelperUtil.validateServletWebRequestForUri(servletWebRequest))
+//                        .errors(List.of(Errors.builder().errorMessage("Unexpected error occurred").build()))
+//                        .build(),
+//                HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 
     /**
      * Handler Method to return Error Response Object for Time out Exceptions
      *
-     * @param ohmTimeoutException
+     * @param timeOutException
      *            take any instance of Exception as input
      *
      * @return the constructed ErrorResponse
      */
-    @ExceptionHandler(TimeoutException.class)
-    public ResponseEntity<ErrorResponse> handleException(TimeoutException ohmTimeoutException,
-                                                            ServletWebRequest servletWebRequest) {
+    @ExceptionHandler(TimeOutException.class)
+    public ResponseEntity<ErrorResponse> handleException(TimeOutException timeOutException,
+                                                         ServletWebRequest servletWebRequest) {
 
         return new ResponseEntity<>(
                 ErrorResponse.builder()
@@ -307,7 +283,7 @@ public class GlobalExceptionHandler {
                         .method(HttpMethod.valueOf(ExceptionHandlerHelperUtil.validateServletWebRequestForHttpMethod(servletWebRequest)))
                         .statusCode(HttpStatus.GATEWAY_TIMEOUT.name())
                         .requestUri(ExceptionHandlerHelperUtil.validateServletWebRequestForUri(servletWebRequest))
-                        .errors(List.of(Errors.builder().errorMessage("Timeout while processing the request").build()))
+                        .errors(List.of(Errors.builder().errorMessage(Constants.TIMEOUT_ERROR_MESSAGE).build()))
                         .build(),
                 HttpStatus.GATEWAY_TIMEOUT);
 

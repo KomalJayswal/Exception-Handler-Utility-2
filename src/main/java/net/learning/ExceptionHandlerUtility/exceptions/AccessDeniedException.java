@@ -7,7 +7,11 @@ import java.util.List;
 
 public class AccessDeniedException extends DataInputs {
 
-    public AccessDeniedException(List<Errors> errorMessage) {
+    /*public AccessDeniedException(List<Errors> errorMessage) {
         this.errorMessage = errorMessage;
+    }*/
+
+    public AccessDeniedException(){
+        // NO-OP
     }
 }
